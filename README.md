@@ -52,7 +52,7 @@ Create device nodes for serial console:
 Note: `/dev/console` is needed for first boot to `/bin/sh` and `/dev/ttyS0` is
 needed for normal boot to `init`.
 
-Edit `jav-rootfs/etc/inittab to *comment* all `getty` lines that end with `tty#`
+Edit `jav-rootfs/etc/inittab` to *comment* all `getty` lines that end with `tty#`
 (since we have no screen), such as:
 
     1:2345:respawn:/sbin/getty 38400 tty1
