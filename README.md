@@ -482,12 +482,12 @@ SATA
 
 Javelin contains the following SATA hardware:
 
-    * [Promise
-      PDC42819](http://firstweb.promise.com/product/product_detail_eng.asp?product_id=191)
-      SATA/SAS RAID Controller hooked up to the PCI Express bus
+  * [Promise
+    PDC42819](http://firstweb.promise.com/product/product_detail_eng.asp?product_id=191)
+    SATA/SAS RAID Controller hooked up to the PCI Express bus
 
-    * Synopsys DesignWare Cores SATA Controller (DWC) built into the AMCC 460EX SoC
-      (presumably this serves the eSATA port on the back)
+  * Synopsys DesignWare Cores SATA Controller (DWC) built into the AMCC 460EX SoC
+    (presumably this serves the eSATA port on the back)
 
 Output from `lspci`:
 
