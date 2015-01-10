@@ -1,0 +1,13 @@
+#<file system>		<dir>	<type>	<options>	<dump>	<pass>
+LABEL=sys		/	ext3	defaults	1	1
+LABEL=swap		swap	swap	defaults	0	0
+LABEL=boot		/boot	vfat	defaults	1	1
+
+# noauto is important since fstab is "executed" before the mtdblock
+# init script that creates the /dev/mtdblock* device nodes
+/dev/mtdblock6	/mnt/mtd/usr/img jffs2	noauto,user,ro	0	0
+/dev/mtdblock9	/mnt/mtd/app/img jffs2	noauto,user,ro	0	0
+
+# These can only be mounted after the above have been mounted
+/mnt/mtd/usr/img/usr_sqfs /mnt/mtd/usr/fs squashfs noauto,user,ro 0	0
+/mnt/mtd/app/img/app_sqfs /mnt/mtd/app/fs squashfs noauto,user,ro 0	0
