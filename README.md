@@ -477,6 +477,98 @@ in `drivers/char/ppc4xx_gpio.c` ([in source tree released by
 GPL](http://www.patriotmemory.com/software/Javelin/JV4800p_GPL_Source_v1.0.rar))
 and through resources on GPIO on Linux.
 
+SATA
+----
+
+Javelin contains the following SATA hardware:
+
+    * [Promise
+      PDC42819](http://firstweb.promise.com/product/product_detail_eng.asp?product_id=191)
+      SATA/SAS RAID Controller hooked up to the PCI Express bus
+
+    * Synopsys DesignWare Cores SATA Controller (DWC) built into the AMCC 460EX SoC
+      (presumably this serves the eSATA port on the back)
+
+Output from `lspci`:
+
+    81:00.0 RAID bus controller: Promise Technology, Inc. PDC42819 [FastTrak TX2650/TX4650]
+
+The driver for DWC is `sata_dwc` and is present among the module binaries
+copied earlier, so it should work out of the box once you attach a drive to the
+port on the back, as suggested by `dmesg | grep -i dwc` output:
+
+    sata-dwc sata-dwc.0: id 0, controller version 1.82
+    sata-dwc sata-dwc.0: DMA initialized
+    sata-dwc sata-dwc.0: **** No neg speed (nothing attached?)
+
+There are two drivers for Promise PDC42819:
+
+  1. The Promise proprietary ("partially open source") [FX2650/4650
+     driver](http://firstweb.promise.com/support/download/download2_eng.asp?productID=191&category=all&os=100):
+     in `t3sas` module
+
+     The [FX2650/4650 user
+     manual](http://firstweb.promise.com/upload/Support/Manual/FastTrak_TX4650-2650_User_v1.0b.pdf)
+     gives a comprehensive description of what it supports.
+
+     This a ["fake RAID"](https://raid.wiki.kernel.org/index.php/Linux_Raid)
+     controller. IIUC, the biggest problem is that once you create a RAID
+     array using this driver, only this driver is capable to interpret the
+     data from the drives (BAD!). Also, to use the drives at all you need
+     the vendor's user space tools (Promise WebTRACK).
+
+     With `t3sas` module loaded, the `i2arytool` in stock `usr` fs sees the
+     drives (e.g. with `i2arytool extlist 0`). So, it probably is feasible
+     to make use of this Promise driver in this Debian install. *However that
+     is an unrecommended dead-end pursuit*. Maybe some kind of performance
+     gain could be extracted, but one would need to hit a real performance
+     bottleneck in one's use-case before even considering it.
+
+  2. [AHCI generic SATA driver](https://raid.wiki.kernel.org/index.php/Linux_Raid)
+     in `ahci` module
+
+     This is a generic driver that supports multiple chipsets. It exposes
+     the drives as raw block devices, with devices nodes created at
+     `/dev/sd*` by `udev` as usual. This is the way to go. If RAID is
+     desired, portable Linux software RAID should work fine.
+
+     The `ahci` module binary is not included in the original firmware, but
+     takes a few quick minutes to build.
+
+SSH into your Javelin, download the Javelin firmware source code released in
+compliance with GPL from the Promise website, and extract the kernel source:
+
+    # apt-get install unrar-free
+    # wget http://www.patriotmemory.com/software/Javelin/JV4800p_GPL_Source_v1.0.rar
+    # unrar -x JV4800p_GPL_Source_v1.0.rar
+    # cd GPL_Source
+    # tar xf linux-2.6.32
+    # cd linux-2.6.32
+    #
+    # apt-get build-dep linux
+    # apt-get install libncurses5-dev
+    #
+    # export CROSS_COMPILE=
+    # make menuconfig
+
+Set `CONFIG_SATA_AHCI=m` by finding it in Device Drivers -> Serial ATA -> AHCI.
+Build the module (`crtsavres.o` prerequisite is not built automatically for
+some reason, so build it manually), and install (the warning about symbol
+versions info seems to be harmless):
+
+    # make oldconfig prepare modules_prepare
+    # make arch/powerpc/lib/crtsavres.o
+    # make M=drivers/ata modules
+    # make M=drivers/ata modules_install
+    # depmod
+
+Blacklist the Promise module to prevent it from claiming the drives:
+
+    # echo 'blacklist t3sas' > /etc/modprobe.d/promise-sata-blacklist.conf
+
+The `ahci` module will be loaded automatically at boot by virtue of
+`depmod`+`udev` and `/dev/sd*` nodes should become available.
+
 Finish
 ------
 
