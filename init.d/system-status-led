@@ -1,0 +1,98 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          system-status-led
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Turn the system status LED to blue
+# Description:       When autobooting, U-Boot bootloader turns the
+#                    system status LED to red, with the expectations
+#                    that userspace will turn it to blue once boot completes.
+#                    This script does exactly that.
+### END INIT INFO
+
+# Author: Alexei Colin <ac@alexeicolin.com>
+
+# Do NOT "set -e"
+
+# PATH should only include /usr/* if it runs after the mountnfs.sh script
+PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
+DESC="Turn system status LED to blue"
+NAME=
+DAEMON=
+DAEMON_ARGS=
+PIDFILE=
+SCRIPTNAME=/etc/init.d/system-status-led
+
+# Read configuration variable file if it is present
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+# Load the VERBOSE setting and other rcS variables
+. /lib/init/vars.sh
+
+# Define LSB log_* functions.
+# Depend on lsb-base (>= 3.2-14) to ensure that this file is present
+# and status_of_proc is working.
+. /lib/lsb/init-functions
+
+# See ledctl -h
+SYSTEM_STATUS_LED=0
+LED_STATE_OFF=0
+LED_STATE_BLUE=1
+LED_STATE_RED=2
+LED_STATE_ORANGE=3
+LED_STATE_GREEN=4
+
+do_start()
+{
+    ledctl $SYSTEM_STATUS_LED $LED_STATE_BLUE
+}
+
+do_stop()
+{
+    ledctl $SYSTEM_STATUS_LED $LED_STATE_OFF
+}
+
+case "$1" in
+  start)
+	[ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC" "$NAME"
+	do_start
+	case "$?" in
+		0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+		2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+	esac
+	;;
+  stop)
+	[ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
+	do_stop
+	case "$?" in
+		0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+		2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+	esac
+	;;
+  restart|force-reload)
+	log_daemon_msg "Restarting $DESC" "$NAME"
+	do_stop
+	case "$?" in
+	  0|1)
+		do_start
+		case "$?" in
+			0) log_end_msg 0 ;;
+			1) log_end_msg 1 ;; # Old process is still running
+			*) log_end_msg 1 ;; # Failed to start
+		esac
+		;;
+	  *)
+		# Failed to stop
+		log_end_msg 1
+		;;
+	esac
+	;;
+  *)
+	echo "Usage: $SCRIPTNAME {start|stop|restart}" >&2
+	exit 3
+	;;
+esac
+
+:
