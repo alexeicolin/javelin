@@ -428,6 +428,12 @@ Create the mount directories:
 
     # mkdir -p /mnt/mtd/{usr,app}/{img,fs}
 
+Create a couple extra loop devices to be able to mount both `app` and `usr` at
+the same time (and maybe something else too), `loop0` exists by default:
+
+    # mknod /dev/loop1 b 7 1
+    # mknod /dev/loop2 b 7 2
+
 Then, to mount the file system, use two steps, for example for `usr` fs:
     
     # mount /mnt/mtd/usr/img
