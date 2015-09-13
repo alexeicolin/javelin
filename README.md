@@ -230,10 +230,13 @@ ok):
     # cp /mnt/stock-rootfs/lib/modules/*.ko /lib/modules/$(uname -r)/
 
 Create a new ramdisk for Debian with the `usb_storage` module, which is needed
-by the kernel to mount a root file system from the USB drive (ignore the
-warnings from `update-initramfs` about nonexistant `modules.{order,builtin}`):
+by the kernel to mount a root file system from the USB drive, and with `udev`,
+which is needed for refering to the root filesystem on the kernel command line
+(ignore the warnings from `update-initramfs` about nonexistant
+`modules.{order,builtin}`):
 
     # apt-get install initramfs-tools
+    # dpkg-reconfigure udev
     # cat > /etc/initramfs-tools/hooks/usb-storage <<EOF
     > #!/bin/sh
     > . /usr/share/initramfs-tools/hook-functions
