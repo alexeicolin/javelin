@@ -1,5 +1,6 @@
 This guide shows how to install Debian on a USB drive and boot Javelin directly
-from it, using the stock kernel and module binaries from the original firmware.
+from it, using either the stock kernel and module binaries from the original
+firmware or a customized kernel built from the source released by Patriot.
 
 Intro
 -----
@@ -14,14 +15,13 @@ system but have practically no bearing on runtime resource usage. A fresh
 Debian system ran literally nothing except kernel threads, `init`, `getty` and
 `bash`.
 
-Re-using the stock kernel and module binaries has the disadvantage that they
-are not the bleeding edge versions compiled by you (sad), but have the
-advantage that the device hardware is practically guaranteed to function as
+Re-using the stock kernel binary or compiling the exact version released by
+Patriot has the disadvantage that it is not the bleeding edge version, but have
+the advantage that the device hardware is practically guaranteed to function as
 completely and correctly as with stock firmware (particularly thermal
-monitoring, fan speed, power-saving features, etc.). Also, the `t3sas` driver
-for the Promise SATA controller is closed source. As BadIntensions
-[implied](http://www.patriotmemory.com/forums/showthread.php?6980-Heavy-duty-Javelin-hacking&p=45967#post45967),
-there is an open source alternative (not sure how the feature sets compare).
+monitoring, fan speed, power-saving features, etc.). The closed-source `t3sas`
+driver for the Promise SATA controller would also work, however [it is not
+recommended](#sata).
 
 The following procedure does not introduce anything particularly new to the
 findings by
@@ -196,8 +196,9 @@ will do shortly:
 
     # apt-get install udev
 
-*Troubleshooting*: this warning is printed during init (probably related to
-`udev`), but whatever is broken did not bite so far:
+*Troubleshooting*: this warning is printed during init, but whatever is broken
+did not bite so far (when [building custom kernel](#custom-kernel), we get rid
+of this warning):
 
     [warn] CONFIG_SYSFS_DEPRECATED must not be selected ... (warning).
     [warn] Booting will continue in 30 seconds but many things will be broken ... (warning).
@@ -212,6 +213,10 @@ This time we want to boot with MTD partitions being accessible:
 
     # setenv addtty ${addtty} ${mtdparts}
     # run nfsboot
+
+First, we will get a working bootable setup using the stock kernel shipped with
+the Javelin extracted from the NAND. A [later section](#custom-kernel) will
+cover an option to customize the kernel configuration and build it from source.
 
 Get the modules from the stock ramdisk (message from gunzip about trailing
 garbage is because we copied the whole partition instead of the image, it is
@@ -357,8 +362,8 @@ If you ever want to boot the stock firmware, get to U-Boot prompt and execute
 `run nandboot`. Execute `setenv real_bootcmd run nandboot` to make the choice
 permanent.
 
-Userspace
----------
+Userspace: basic system setup
+-----------------------------
 
 Apt needs a dialog frontend, so before anything else install it:
 
@@ -400,6 +405,77 @@ Javelin, so re-create it on the Javelin (replace X with the letter of the USB
 drive that the Javelin assigned to it -- THIS IS **NOT** ON THE HOST SYSTEM):
 
     # mkswap -L swap /dev/sdX2
+
+Custom kernel
+-------------
+
+To customize the kernel configuration, you can build the kernel yourself.  The
+version released by Patriot as part of GPL compliance (2.6.32.14) builds and
+boots smoothly with the Device Tree Blob (DTB) extracted from NAND
+[earlier](#nfs-boot-second-stage). Getting a more recent mainline kernel to
+work is likely to be very very difficult. Also, it is easiest to compile
+natively as opposed to getting a cross-compilation toolchain working. Build
+time is on the order of hours.
+
+SSH into your newly-setup Javelin system, and get the kernel source
+([mirrored here](http://files.alexeicolin.com/javelin/JV4800p_GPL_Source_v1.0.rar)),
+and install build dependencies:
+
+    # apt-get install unrar-free
+    # wget http://www.patriotmemory.com/software/Javelin/JV4800p_GPL_Source_v1.0.rar
+    # unrar -x JV4800p_GPL_Source_v1.0.rar
+    # cd GPL_Source
+    # tar xf linux-2.6.32
+    # cd linux-2.6.32
+    #
+    # apt-get build-dep linux
+    # apt-get install libncurses5-dev
+
+Configure the kernel for native build:
+
+    # export CROSS_COMPILE=""
+    # make menuconfig
+
+In the menu, using the search function (`/`):
+
+* set `CONFIG_LOCALVERSION` to a suffix appended to the kernel version, to
+  distinguish your customized kernel
+* enable `CONFIG_PPC_DISABLE_WERROR`: to make it build at all
+* enable `CONFIG_USB_STORAGE`: to boot from root file system on USB drive
+* enable `CONFIG_SATA_AHCI`: to access hard drives as block devices (see
+  [section on SATA](#sata))
+* disable `CONFIG_SYSFS_DEPRECATED_V2`: to get rid of warning and delay in
+  boot issued by the Debian userspace
+* whatever else you want to customize
+
+Build the kernel and install the modules (only one by default:
+`sci_wait_scan.ko`, which can't be built-in and recommented by comments in
+`Kconfig` to be enabled):
+
+	# make
+	# sudo make modules_install
+	# cd ..
+
+Backup the currently booted kernel image:
+
+	# cp /boot/kernel.img{,.bak}
+	# cp /boot/ramdisk.img{,.bak}
+
+Package the kernel into a uBoot image:
+
+	# objcopy -O binary linux-2.6.32/arch/powerpc/boot/vmlinux.strip vmlinux.bin
+	# gzip -v9 vmlinux.bin
+	# mkimage -A powerpc -O linux -T kernel -C gzip -n "Linux-2.6.32.14-suffix" -d vmlinux.bin.gz /boot/kernel.img
+
+Create the ramdisk, and package it into a uBoot image:
+
+	# cd ..
+	# sudo update-initramfs -c -k 2.6.32.14-suffix -b $PWD
+	# mkimage -T ramdisk -A powerpc -O linux -n "initramfs-2.6.32.14-suffix" -C none -d initrd.img-2.6.32.14-suffix /boot/ramdisk.img
+
+The Device Tree Blob (DTB) necessary for boot was extracted from NAND in an
+[earlier step of this guide](#nfs-boot-second-stage), and should be in
+`/boot/dtb.img`.
 
 Mounting the stock NAND partitions
 ----------------------------------
@@ -474,7 +550,7 @@ Presumably, the `ledctl` binary creates a device node for `ppc4xx_gpio` char
 device and does I/O on it. To avoid using a binary, it should be possible to
 write your own equivalent script. It might help to look through the driver code
 in `drivers/char/ppc4xx_gpio.c` ([in source tree released by
-GPL](http://www.patriotmemory.com/software/Javelin/JV4800p_GPL_Source_v1.0.rar))
+GPL](http://www.patriotmemory.com/software/Javelin/JV4800p_GPL_Source_v1.0.rar) [mirror](http://files.alexeicolin.com/javelin/JV4800p_GPL_Source_v1.0.rar))
 and through resources on GPIO on Linux.
 
 SATA
@@ -533,23 +609,13 @@ There are two drivers for Promise PDC42819:
      desired, portable Linux software RAID should work fine.
 
      The `ahci` module binary is not included in the original firmware, but
-     takes a few quick minutes to build.
+     takes a few quick minutes to build as a kernel module. If you built
+     your own kernel according to [instructions above](#custom-kernel), then
+     `ahci` is already built into the kernel, and no steps are necessary here.
 
-SSH into your Javelin, download the Javelin firmware source code released in
-compliance with GPL from the Promise website, and extract the kernel source:
-
-    # apt-get install unrar-free
-    # wget http://www.patriotmemory.com/software/Javelin/JV4800p_GPL_Source_v1.0.rar
-    # unrar -x JV4800p_GPL_Source_v1.0.rar
-    # cd GPL_Source
-    # tar xf linux-2.6.32
-    # cd linux-2.6.32
-    #
-    # apt-get build-dep linux
-    # apt-get install libncurses5-dev
-    #
-    # export CROSS_COMPILE=
-    # make menuconfig
+SSH into your Javelin, follow the first several steps of [the section on
+compiling your own kernel](#custom-kernel) to download the kernel source code
+and open the kernel configuration menu.
 
 Set `CONFIG_SATA_AHCI=m` by finding it in Device Drivers -> Serial ATA -> AHCI.
 Build the module (`crtsavres.o` prerequisite is not built automatically for
