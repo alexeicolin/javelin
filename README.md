@@ -52,6 +52,10 @@ Create device nodes for serial console:
 Note: `/dev/console` is needed for first boot to `/bin/sh` and `/dev/ttyS0` is
 needed for normal boot to `init`.
 
+Create 'inittab' from a template:
+
+    # cp jav-rootfs/usr/share/sysvinit/inittab jav-rootfs/etc/inittab
+
 Edit `jav-rootfs/etc/inittab` to *comment* all `getty` lines that end with `tty#`
 (since we have no screen), such as:
 
@@ -115,6 +119,26 @@ Open a terminal client, like `screen` (or `minicom`):
 
     # screen /dev/ttyUSB0 115200
 
+Booting
+-------
+
+There are two options for serving the root file system (created in the above steps):
+
+* NFS from any Linux host on a local LAN
+* USB drive
+
+The NFS option is described step-by-step below, because this is the approach I
+took.
+
+For the USB option (not tested), partition the drive (see [Bootable USB
+drive](#bootable-usb-drive)), copy `jav-rootfs` to the system partition (same
+section). Then, insert USB stick into Javelin.  In U-boot prompt, set
+`bootargs` to contain `root=/dev/sda3` and `init=/bin/sh`. Then,`run `nandboot`
+to boot the kernel stored in NAND (there is no kernel on the USB stick yet!),
+but with the root file system from the USB stick.  Then, continue with
+finishing bootstrap (see end of section [NFS boot: first
+stage](#nfs-boot-first-stage)).
+
 NFS boot: first stage
 ---------------------
 
@@ -146,6 +170,10 @@ append to `addtty`, which is shorter.
 
 *Troubleshooting*: `Warning: unable to open an initial console.` from `/bin/sh`
 appears when there is no `/dev/console` device node. See above.
+
+Remount root file system as read-write:
+
+    # mount -o remount,rw /
 
 Finish the bootstrap in the shell that the device booted into:
 
