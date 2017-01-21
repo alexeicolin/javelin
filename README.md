@@ -670,3 +670,8 @@ Finish
 ------
 
 Enjoy *your* hardware! One day they will sell it ready for use out-of-the-box...
+
+Files
+-----
+
+Just in case, images for the stock and my compilation of the kernel along with DTB and ramdisk are available <a href="http://alexeicolin.com/content/javelin/">here</a>.
