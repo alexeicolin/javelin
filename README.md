@@ -454,7 +454,7 @@ and install build dependencies:
 
     # apt-get install unrar-free
     # wget http://www.patriotmemory.com/software/Javelin/JV4800p_GPL_Source_v1.0.rar
-    # unrar x JV4800p_GPL_Source_v1.0.rar
+    # unrar -x JV4800p_GPL_Source_v1.0.rar
     # cd GPL_Source
     # tar xf linux-2.6.32
     # cd linux-2.6.32
