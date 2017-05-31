@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# LED     RED  BLUE  ORANGE
+# sys     507  448   509   
+# hd1     468  469   470   
+# hd2     471  472   473
+# hd3     474  475   476
+# hd4     477  478   479
+# button             511
+# vdd      456 (?)
+
+
+LED_GPIOS_ON="448"
+LED_GPIOS_OFF="507"
+
+SYS=/sys/class/gpio
+
+for g in $LED_GPIOS_ON $LED_GPIOS_OFF
+do
+	echo "${g}" > $SYS/export
+	echo "out" > $SYS/gpio${g}/direction
+done
+
+for g in $LED_GPIOS_OFF
+do
+	echo 1 > $SYS/gpio${g}/value
+done
+
+for g in $LED_GPIOS_ON
+do
+	echo 0 > $SYS/gpio${g}/value
+done
