@@ -1,0 +1,9 @@
+[Unit]
+Description=Setup GPIOs for LEDs and set main to blue
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/leds
+
+[Install]
+WantedBy=multi-user.target
