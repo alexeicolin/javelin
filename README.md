@@ -25,7 +25,7 @@ recommended](#sata).
 
 The following procedure does not introduce anything particularly new to the
 findings by
-[BadIntensions](http://www.patriotmemory.com/forums/showthread.php?6980-Heavy-duty-Javelin-hacking),
+[BadIntensions](http://web.archive.org/web/20130202084740/http://www.patriotmemory.com/forums/showthread.php?6980-Heavy-duty-Javelin-hacking),
 [senomoto](http://www.patriotmemory.com/forums/showthread.php?8421-Bricked-Javelin),
 and everyone else, except maybe the LED handling ;). The Debian installation is
 standard procedure.
@@ -92,9 +92,9 @@ Packaging an uber-user-friendly solution that would work out-of-the box without
 requiring a UART purchase and setup might be feasible, but is not for me to do.
 
 Get the [4-pin JST
-connector](http://www.patriotmemory.com/forums/showthread.php?6980-Heavy-duty-Javelin-hacking&p=42064#post42064)
+connector](http://web.archive.org/web/20130202084740/http://www.patriotmemory.com/forums/showthread.php?6980-Heavy-duty-Javelin-hacking&p=42064#post42064)
 [discovered by
-BadIntensions](http://www.patriotmemory.com/forums/showthread.php?6980-Heavy-duty-Javelin-hacking&p=42064#post42064).
+BadIntensions](http://web.archive.org/web/20130202084740/http://www.patriotmemory.com/forums/showthread.php?6980-Heavy-duty-Javelin-hacking&p=42064#post42064).
 
 Get a [USB->UART 3.3v adapter](https://www.sparkfun.com/products/12977) (most
 commonly based on FTDI chip). To hook the JST connector to the UART-to-USB
