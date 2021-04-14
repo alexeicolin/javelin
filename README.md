@@ -112,6 +112,9 @@ with pins numbered left-to-right:
     GND      [2]  -> GND
     RX       [3]  -> TX
     VCC      [4]  -> no connection
+    
+![javelin-s4-uart-pinout](https://user-images.githubusercontent.com/1269002/114777267-81243180-9d41-11eb-965e-0a9b346481d7.jpg)
+
 
 Connect the USB->UART cable into host and check that it is detected, i.e. that
 a `/dev/ttyUSB0` device exists. If it does not, then check `dmesg` and `lsusb`.
