@@ -452,11 +452,11 @@ natively as opposed to getting a cross-compilation toolchain working. Build
 time is on the order of hours.
 
 SSH into your newly-setup Javelin system, and get the kernel source
-([mirrored here](http://files.alexeicolin.com/javelin/JV4800p_GPL_Source_v1.0.rar)),
+[JV4800p_GPL_Source_v1.0.rar](http://www.patriotmemory.com/software/Javelin/JV4800p_GPL_Source_v1.0.rar), also mirrored at
+[JV4800p_GPL_Source_v1.0.rar](https://drive.proton.me/urls/1H0BYNP33R#tCFNaF3VQSHS),
 and install build dependencies:
 
     # apt-get install unrar-free
-    # wget http://www.patriotmemory.com/software/Javelin/JV4800p_GPL_Source_v1.0.rar
     # unrar -x JV4800p_GPL_Source_v1.0.rar
     # cd GPL_Source
     # tar xf linux-2.6.32
@@ -583,9 +583,9 @@ Edit the `system-status-led` if you want the LED completely off instead of blue.
 Presumably, the `ledctl` binary creates a device node for `ppc4xx_gpio` char
 device and does I/O on it. To avoid using a binary, it should be possible to
 write your own equivalent script. It might help to look through the driver code
-in `drivers/char/ppc4xx_gpio.c` ([in source tree released by
-GPL](http://www.patriotmemory.com/software/Javelin/JV4800p_GPL_Source_v1.0.rar) [mirror](http://files.alexeicolin.com/javelin/JV4800p_GPL_Source_v1.0.rar))
-and through resources on GPIO on Linux.
+in `drivers/char/ppc4xx_gpio.c` in source tree released by GPL (see
+`JV4800p_GPL_Source_v1.0.rar` linked above), and through resources on GPIO on
+Linux.
 
 SATA
 ----
