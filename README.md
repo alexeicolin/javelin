@@ -676,7 +676,8 @@ Enjoy *your* hardware! One day they will sell it ready for use out-of-the-box...
 Files
 -----
 
-Just in case, the archive with the source code released under GPL, and images
-for the stock and my compilation of the kernel along with DTB and ramdisk are
+Just in case, the archive with the source code released under GPL, images
+for the stock and my compilation of the kernel along with DTB and ramdisk,
+and user manual for Promise FastTrak TX4650/2650 hardware are
 available <a
 href="https://drive.proton.me/urls/9YXA9KSGWG#Sz6k4jHFwQBO">here</a>.
