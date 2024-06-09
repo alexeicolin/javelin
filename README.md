@@ -452,9 +452,8 @@ natively as opposed to getting a cross-compilation toolchain working. Build
 time is on the order of hours.
 
 SSH into your newly-setup Javelin system, and get the kernel source
-[JV4800p_GPL_Source_v1.0.rar](http://www.patriotmemory.com/software/Javelin/JV4800p_GPL_Source_v1.0.rar), also mirrored at
-[JV4800p_GPL_Source_v1.0.rar](https://drive.proton.me/urls/1H0BYNP33R#tCFNaF3VQSHS),
-and install build dependencies:
+[JV4800p_GPL_Source_v1.0.rar](http://www.patriotmemory.com/software/Javelin/JV4800p_GPL_Source_v1.0.rar) (also mirrored at link given at end of this guide), and install build
+dependencies:
 
     # apt-get install unrar-free
     # unrar -x JV4800p_GPL_Source_v1.0.rar
@@ -677,4 +676,7 @@ Enjoy *your* hardware! One day they will sell it ready for use out-of-the-box...
 Files
 -----
 
-Just in case, images for the stock and my compilation of the kernel along with DTB and ramdisk are available <a href="http://alexeicolin.com/content/javelin/">here</a>.
+Just in case, the archive with the source code released under GPL, and images
+for the stock and my compilation of the kernel along with DTB and ramdisk are
+available <a
+href="https://drive.proton.me/urls/9YXA9KSGWG#Sz6k4jHFwQBO">here</a>.
